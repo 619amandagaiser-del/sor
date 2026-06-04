@@ -1,24 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game with Overlay Chat</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>10 Minutes Till Dawn + Chat</title>
+    <script src="Build/UnityLoader.js"></script>
+    <link rel="icon" href="icon.png">
+    <script>
+      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/10MinutesTillDawnWebGL.json");
+      var scaleToFit;
+      try {
+        scaleToFit = !!JSON.parse("");
+      } catch (e) {
+        scaleToFit = true;
+      }
 
-    <div class="game-wrapper">
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
+      function onResize() {
+        var canvas = gameInstance.Module.canvas;
+        var container = gameInstance.container;
+        var w;
+        var h;
 
-        <div id="chatOverlay" class="chat-overlay">
-            <div id="chatMessages" class="chat-messages">
-                <div class="system-msg">System: Press [Enter] to start typing!</div>
-            </div>
-            <input type="text" id="chatInput" placeholder="Type a message..." maxlength="100" autocomplete="off" />
+        if (scaleToFit) {
+          w = window.innerWidth;
+          h = window.innerHeight;
+
+          var r = 675 / 1200;
+
+          if (w * r > window.innerHeight) {
+            w = Math.min(w, Math.ceil(h / r));
+          }
+          h = Math.floor(w * r);
+        } else {
+          w = 1200;
+          h = 675;
+        }
+
+        container.style.width = canvas.style.width = w + "px";
+        container.style.height = canvas.style.height = h + "px";
+        container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
+        container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
+
+        // Resize the chat wrapper dynamically to perfectly match Unity's bounds
+        var chatWrapper = document.getElementById("chatWrapper");
+        if (chatWrapper) {
+          chatWrapper.style.width = w + "px";
+          chatWrapper.style.height = h + "px";
+          chatWrapper.style.top = container.style.top;
+          chatWrapper.style.left = container.style.left;
+        }
+      }
+      window.addEventListener("resize", onResize);
+    </script>
+    
+    <style>
+      html,
+      body {
+        background: #000;
+        width: 100%;
+        height: 100%;
+        overflow: hidden; /* Changed from visible to hidden to prevent scrollbars */
+        padding: 0;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      div#gameContainer {
+        background: transparent !important;
+        position: absolute;
+        z-index: 1; /* Sits beneath the chat wrapper */
+      }
+
+      div#gameContainer canvas {
+        position: absolute;
+      }
+
+      div#gameContainer[data-pixelated="true"] canvas {
+        image-rendering: optimizeSpeed;
+        image-rendering: -webkit-crisp-edges;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -o-crisp-edges;
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: optimize-contrast;
+        image-rendering: pixelated;
+        -ms-interpolation-mode: nearest-neighbor;
+      }
+
+      /* --- OVERLAY CHAT CSS --- */
+      
+      /* Transparent layer matching the exact canvas size to anchor the chat box */
+      .chat-wrapper {
+        position: absolute;
+        z-index: 10; /* Ensures chat sits strictly on top of Unity WebGL */
+        pointer-events: none; /* Mouse clicks pass directly into the game */
+      }
+
+      .chat-overlay {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        width: 340px;
+        height: 200px;
+        background-color: rgba(0, 0, 0, 0.25);
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        transition: background-color 0.2s ease, border 0.2s ease;
+        pointer-events: none;
+      }
+
+      /* Active state changes when typing */
+      .chat-overlay.active {
+        background-color: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        pointer-events: auto; /* Allows scrolling and clicking the input */
+      }
+
+      .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        pointer-events: auto; /* Always allows text scrolling if needed */
+      }
+
+      /* Sleek scrolling track */
+      .chat-messages::-webkit-scrollbar {
+        width: 4px;
+      }
+      .chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 2px;
+      }
+
+      .chat-msg {
+        color: #fff;
+        font-size: 14px;
+        margin-bottom: 4px;
+        word-break: break-word;
+        text-shadow: 2px 2px 3px #000, -1px -1px 3px #000; /* Legibility over bright gameplay */
+      }
+
+      .system-msg {
+        color: #00ffcc;
+        font-size: 13px;
+        font-style: italic;
+        margin-bottom: 4px;
+        text-shadow: 1px 1px 2px #000;
+      }
+
+      #chatInput {
+        background: transparent;
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        color: white;
+        padding: 8px 12px;
+        outline: none;
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .chat-overlay.active #chatInput {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.05);
+      }
+    </style>
+  </head>
+
+  <body onload="onResize();">
+    <div id="gameContainer" data-pixelated="true"></div>
+
+    <div id="chatWrapper" class="chat-wrapper">
+      <div id="chatOverlay" class="chat-overlay">
+        <div id="chatMessages" class="chat-messages">
+          <div class="system-msg">System: Press [Enter] to toggle Chat window!</div>
         </div>
+        <input type="text" id="chatInput" placeholder="Press Enter to type..." maxlength="100" autocomplete="off" />
+      </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <script>
+      const chatOverlay = document.getElementById('chatOverlay');
+      const chatInput = document.getElementById('chatInput');
+      const chatMessages = document.getElementById('chatMessages');
+      let isTyping = false;
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          // Stop Unity from capturing the Enter key while trying to open/close chat
+          event.stopPropagation();
+
+          if (!isTyping) {
+            // Open Chat Input Window
+            isTyping = true;
+            chatOverlay.classList.add('active');
+            chatInput.focus();
+          } else {
+            // Close Window & Post Text
+            const text = chatInput.value.trim();
+            if (text !== "") {
+              appendMessage("Player 1", text);
+              chatInput.value = "";
+            }
+            isTyping = false;
+            chatOverlay.classList.remove('active');
+            chatInput.blur();
+            
+            // Re-focus the main window context so keyboard control returns cleanly to Unity
+            window.focus(); 
+          }
+        }
+
+        // When typing, prevent your game control bindings (WASD/Space/Arrows) from leaking into Unity
+        if (isTyping && event.key !== 'Enter') {
+          event.stopPropagation();
+        }
+      });
+
+      function appendMessage(sender, message) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('chat-msg');
+        msgDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Keeps view scrolled to bottom
+      }
+    </script>
+  </body>
 </html>
