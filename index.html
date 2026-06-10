@@ -2701,7 +2701,7 @@
           </div>
         </div>
         <div class="hero-stage">
-          <canvas id="arenaCanvas" aria-label="Animated arcade scene" width="792" height="397"></canvas>
+          <canvas id="arenaCanvas" aria-label="Animated arcade scene" width="355" height="277"></canvas>
         </div>
       </section>
 
@@ -6179,6 +6179,7 @@
       { id: "vault", title: "Vault Eleven", category: "Strategy", mood: "Deep", players: "Solo", playable: false, desc: "A planning game about routes, tools, and timing.", art: "linear-gradient(135deg, #58a6ff, #151a21 52%, #87d37c)" }
     ];
 
+    const monkeyFolderBase = location.pathname.toLowerCase().includes("/monkeygg2.github.io-main/") ? "." : "./monkeygg2.github.io-main";
     const importedGames = Object.entries(window.json?.games || {}).map(([title, entry], index) => {
       const category = entry.categories?.[0] ? entry.categories[0].replace(/(^|\s)\S/g, letter => letter.toUpperCase()) : "Imported";
       return {
@@ -6189,7 +6190,7 @@
         players: entry.categories?.includes("online") ? "Online" : "Solo",
         playable: false,
         imported: true,
-        href: entry.path.includes("?") ? `./monkeygg2.github.io-main/games/${entry.path}` : `./monkeygg2.github.io-main/games/${entry.path}/index.html`,
+        href: entry.path.includes("?") ? `${monkeyFolderBase}/games/${entry.path}` : `${monkeyFolderBase}/games/${entry.path}/index.html`,
         desc: entry.aliases?.length ? `Also known as ${entry.aliases.slice(0, 3).join(", ")}.` : "Imported from the MonkeyGG2 catalog.",
         art: `linear-gradient(135deg, ${["#f05365", "#22c7a9", "#f7b955", "#58a6ff", "#87d37c"][index % 5]}, #171b24 56%, ${["#58a6ff", "#f05365", "#22c7a9", "#87d37c", "#f7b955"][(index + 2) % 5]})`,
         added: index
@@ -6416,7 +6417,7 @@
 
     async function checkHostedSupportFolders() {
       const checks = [
-        ["monkeygg2.github.io-main", "./monkeygg2.github.io-main/js/config.js"],
+        ["monkeygg2.github.io-main", `${monkeyFolderBase}/js/config.js`],
         ["story-network", "./story-network/index.html"]
       ];
       const missing = [];
@@ -8207,3 +8208,4 @@
 
 
 </body><div id="codex-browser-sidebar-comments-root" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483000;"></div></html>
+              
